@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 
 // config
 require("dotenv").config();
@@ -28,7 +28,31 @@ async function run() {
       try {
         const product = req.body;
         const result = await productCollection.insertOne(product);
-        console.log(result);
+
+        res.send(result);
+      } catch (error) {
+        console.log(error.message);
+      }
+    });
+    // get my products form server
+    app.get("/myProduct/:email", async (req, res) => {
+      try {
+        const email = req.params.email;
+        const result = await productCollection.find({ email: email }).toArray();
+
+        res.send(result);
+      } catch (error) {
+        console.log(error.message);
+      }
+    });
+
+    // cart product  delete from server
+    app.delete("/delete-cart/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await productCollection.deleteOne(query);
+
         res.send(result);
       } catch (error) {
         console.log(error.message);
@@ -37,7 +61,7 @@ async function run() {
 
     console.log("Successfully connected to Atlas");
   } catch (err) {
-    console.log(err.stack);
+    console.log(err.message);
   } finally {
     // await client.close();
   }
